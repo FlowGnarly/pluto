@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prototype Page</title>
+</head>
+
+<body>
+    <div>
+        <h3>(<span id="memory_percent"></span>%) Memory Usage</h3>
+        <p>Used: <span id="memory_used"></span></p>
+        <p>Free: <span id="memory_free"></span></p>
+        <p>Total: <span id="memory_total"></span></p>
+
+        <div style="width: 16rem; height: 1rem; background-color: green;">
+            <div id="memory_percent_bar"
+                style="transition: all 500ms ease-in-out; width: 0%; height: 1rem; background-color: red;">
+
+            </div>
+        </div>
+
+        <h3>(<span id="cpu_percent"></span>%) CPU Usage</h3>
+
+        <div style="width: 16rem; height: 1rem; background-color: green;">
+            <div id="cpu_percent_bar"
+                style="transition: all 500ms ease-in-out; width: 0%; height: 1rem; background-color: red;">
+
+            </div>
+        </div>
+
+        <h3>(__%) GPU Usage</h3>
+        <p>Temp: <span id="gpu_temp"></span></p>
+    </div>
+
+    <script>
+        const client_host = window.location.host;
+        const system_information = new WebSocket(`ws://${client_host}/system_information`)
+
+        function formatBytes(bytes, decimalPoint) {
+            if (bytes == 0) return '0 Bytes';
+            var k = 1000,
+                dm = decimalPoint || 2,
+                sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB', 'PB', 'EB', 'ZB', 'YB'],
+                i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
+
+        system_information.onmessage = function (event) {
+            const messages = JSON.parse(event.data)
+
+            for (const [channel, data] of Object.entries(messages)) {
+                if (channel === 'memory_usage') {
+                    document.getElementById('memory_percent').innerHTML = String(Number.parseInt(data.memory_percent)).padStart(2, "0")
+                    document.getElementById('memory_used').innerHTML = formatBytes(data.memory_used, 3)
+                    document.getElementById('memory_free').innerHTML = formatBytes(data.memory_free)
+                    document.getElementById('memory_total').innerHTML = formatBytes(data.memory_total)
+
+                    document.getElementById('memory_percent_bar').style.width = `${data.memory_percent}%`
+                } else if (channel === 'cpu_usage') {
+                    document.getElementById('cpu_percent').innerHTML = String(Number.parseInt(data.cpu_percent)).padStart(2, "0")
+
+                    document.getElementById('cpu_percent_bar').style.width = `${data.cpu_percent}%`
+                } else if (channel === 'gpu_usage') {
+                    document.getElementById('gpu_temp').innerHTML = data.gpu_temps[0]
+                }
+            }
+        };
+    </script>
+</body>
+
+</html>

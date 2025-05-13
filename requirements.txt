@@ -1,0 +1,4 @@
+wintmp
+fastapi[standard]
+qrcode[pil]
+psutil
