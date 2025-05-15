@@ -63,7 +63,7 @@ async def system_information_main():
         )
 
         system_information.add_pending_message(
-            "cpu_usage", {"cpu_percent": psutil.cpu_percent(interval=1)}
+            "cpu_usage", {"cpu_percent": psutil.cpu_percent()}
         )
 
         system_information.add_pending_message(
