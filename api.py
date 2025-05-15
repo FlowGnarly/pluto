@@ -72,7 +72,7 @@ async def system_information_main():
 
         await system_information.send_pending_messages()
 
-        await asyncio.sleep(5)
+        await asyncio.sleep(1)
 
 
 @server.app.on_event("startup")
